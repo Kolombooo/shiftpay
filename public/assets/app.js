@@ -616,8 +616,16 @@
     }, { passive: true });
     document.addEventListener('touchcancel', function () { swipe = null; }, { passive: true });
 
+    function showLoadError(e) {
+        if (e.message === 'signed out') return;
+        $('loadWarn').textContent = 'Couldn’t load your data. ' + e.message + ' Reload the page to try again.';
+        $('loadWarn').hidden = false;
+    }
+
+    // Show the current month (client time) straight away, before any request finishes.
+    render();
     api('GET', '/me').then(function (me) {
         applySettings(me.settings);
         return load().then(function () { if (!state.wage) openSettings(true); });
-    }, function () {});
+    }).catch(showLoadError);
 })();
