@@ -62,7 +62,10 @@ $v = (string)@filemtime(__DIR__ . '/assets/app.js');
     <main class="main">
         <div class="main-head">
             <h2>Shifts</h2>
-            <button class="btn primary" id="addBtnDesk" type="button">Add shift</button>
+            <span class="head-actions">
+                <button class="btn" id="bulkBtnDesk" type="button">Add several</button>
+                <button class="btn primary" id="addBtnDesk" type="button">Add shift</button>
+            </span>
         </div>
         <div class="list" id="list"></div>
         <p class="foot">Saved on your server.</p>
@@ -84,9 +87,16 @@ $v = (string)@filemtime(__DIR__ . '/assets/app.js');
                     <button type="button" id="stPlanned" aria-pressed="false">Planned</button>
                 </div>
             </div>
-            <div class="field full"><label for="fDate">Date</label><input type="date" id="fDate"></div>
-            <div class="field"><label for="fStart">Start</label><input type="time" id="fStart"></div>
-            <div class="field"><label for="fEnd">End</label><input type="time" id="fEnd"></div>
+            <div class="field full cal-wrap">
+                <label for="fDate">Date</label>
+                <div class="withbtn">
+                    <input type="text" id="fDate" inputmode="numeric" placeholder="DD. MM. YYYY" autocomplete="off" maxlength="12">
+                    <button type="button" class="icon-btn cal-btn" id="fDateBtn" aria-label="Choose date from calendar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+                </div>
+                <div class="cal pop" id="fDateCal" hidden></div>
+            </div>
+            <div class="field"><label for="fStart">Start (24 h)</label><input type="text" id="fStart" inputmode="numeric" placeholder="HH:MM" autocomplete="off" maxlength="5"></div>
+            <div class="field"><label for="fEnd">End (24 h)</label><input type="text" id="fEnd" inputmode="numeric" placeholder="HH:MM" autocomplete="off" maxlength="5"></div>
             <div class="field"><label for="fBreak">Unpaid break (min)</label><input type="number" id="fBreak" inputmode="numeric" min="0" step="1"></div>
             <div class="field"><label for="fRate">Hourly rate</label><input type="number" id="fRate" inputmode="decimal" min="0" step="0.01"></div>
             <div class="field full"><label for="fBonus">Bonus for this shift</label><input type="number" id="fBonus" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
@@ -98,6 +108,44 @@ $v = (string)@filemtime(__DIR__ . '/assets/app.js');
             <button class="btn" id="shiftCancel" type="button">Cancel</button>
             <button class="btn primary" id="shiftSave" type="button">Save shift</button>
             <button class="btn danger wide" id="shiftDelete" type="button" hidden>Delete shift</button>
+            <button class="btn wide" id="toBulk" type="button">Add several days at once</button>
+        </div>
+    </div>
+</div>
+
+<!-- bulk sheet -->
+<div class="overlay" id="bulkOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+        <h2 id="bulkTitle">Add several shifts</h2>
+        <div class="grid">
+            <div class="field full">
+                <label id="bStatusLabel">Status</label>
+                <div class="seg" role="group" aria-labelledby="bStatusLabel">
+                    <button type="button" id="bWorked" aria-pressed="false">Worked</button>
+                    <button type="button" id="bPlanned" aria-pressed="false">Planned</button>
+                </div>
+                <p class="hint" id="bStatusHint">Days after today are planned, other days are worked.</p>
+            </div>
+            <div class="field full">
+                <label id="bDaysLabel">Days</label>
+                <div class="cal" id="bCal" role="group" aria-labelledby="bDaysLabel"></div>
+                <div class="chips">
+                    <button type="button" class="chip" id="bWeekdays">Mon–Fri this month</button>
+                    <button type="button" class="chip" id="bClear">Clear days</button>
+                </div>
+            </div>
+            <div class="field"><label for="bStart">Start (24 h)</label><input type="text" id="bStart" inputmode="numeric" placeholder="HH:MM" autocomplete="off" maxlength="5"></div>
+            <div class="field"><label for="bEnd">End (24 h)</label><input type="text" id="bEnd" inputmode="numeric" placeholder="HH:MM" autocomplete="off" maxlength="5"></div>
+            <div class="field"><label for="bBreak">Unpaid break (min)</label><input type="number" id="bBreak" inputmode="numeric" min="0" step="1"></div>
+            <div class="field"><label for="bRate">Hourly rate</label><input type="number" id="bRate" inputmode="decimal" min="0" step="0.01"></div>
+            <div class="field full"><label for="bBonus">Bonus for each shift</label><input type="number" id="bBonus" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field full"><label for="bNote">Note (optional)</label><input type="text" id="bNote" maxlength="80"></div>
+        </div>
+        <p class="preview" id="bPreview"></p>
+        <p class="err" id="bErr" role="alert"></p>
+        <div class="actions">
+            <button class="btn" id="bCancel" type="button">Cancel</button>
+            <button class="btn primary" id="bSave" type="button">Add shifts</button>
         </div>
     </div>
 </div>
@@ -109,9 +157,10 @@ $v = (string)@filemtime(__DIR__ . '/assets/app.js');
         <div class="grid">
             <div class="field"><label for="sWage">Hourly wage</label><input type="number" id="sWage" inputmode="decimal" min="0" step="0.01"></div>
             <div class="field"><label for="sSymbol">Currency symbol</label><input type="text" id="sSymbol" maxlength="4"></div>
+            <div class="field full"><label for="sBreak">Default unpaid break (min)</label><input type="number" id="sBreak" inputmode="numeric" min="0" step="1"></div>
         </div>
         <label class="check"><input type="checkbox" id="sApply"> Also update planned shifts to this wage</label>
-        <p class="hint">New shifts use this wage. Worked shifts keep the rate they were saved with.</p>
+        <p class="hint">New shifts use this wage and break. Existing shifts keep the rate they were saved with.</p>
         <p class="err" id="setErr" role="alert"></p>
         <div class="actions">
             <button class="btn" id="setCancel" type="button">Close</button>

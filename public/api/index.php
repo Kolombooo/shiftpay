@@ -72,6 +72,14 @@ $r->add('POST', '/shifts', function () use ($body) {
     json_out(ShiftRepo::toApi(ShiftRepo::find(ShiftRepo::insert($f))), 201);
 });
 
+$r->add('POST', '/shifts/bulk', function () use ($body) {
+    [$n, $err] = ShiftRepo::insertMany(is_array($body['shifts'] ?? null) ? $body['shifts'] : []);
+    if ($err !== null) {
+        json_error(400, $err);
+    }
+    json_out(['created' => $n], 201);
+});
+
 $r->add('PUT', '/shifts/(\d+)', function (string $id) use ($body) {
     shift_or_404($id);
     [$f, $err] = ShiftRepo::validate($body);

@@ -116,6 +116,41 @@ final class ShiftRepo
         ];
     }
 
+    /**
+     * Creates several shifts in one transaction.
+     *
+     * @return array{0: int, 1: ?string} created count, error
+     */
+    public static function insertMany(array $list): array
+    {
+        if (!$list || count($list) > 62) {
+            return [0, 'Choose between 1 and 62 days.'];
+        }
+        $rows = [];
+        foreach (array_values($list) as $s) {
+            if (!is_array($s)) {
+                return [0, 'That shift is not valid.'];
+            }
+            [$clean, $err] = self::validate($s);
+            if ($err !== null) {
+                return [0, $err];
+            }
+            $rows[] = $clean;
+        }
+        $pdo = Db::get();
+        $pdo->beginTransaction();
+        try {
+            foreach ($rows as $f) {
+                self::insert($f);
+            }
+            $pdo->commit();
+        } catch (Throwable $ex) {
+            $pdo->rollBack();
+            throw $ex;
+        }
+        return [count($rows), null];
+    }
+
     public static function insert(array $f): int
     {
         $pdo = Db::get();
@@ -210,6 +245,9 @@ final class ShiftRepo
         }
         if (isset($set['symbol'])) {
             $setIn['symbol'] = $set['symbol'];
+        }
+        if (isset($set['break'])) {
+            $setIn['break'] = $set['break'];
         }
         if (($err = SettingsRepo::validate($setIn, false)) !== null) {
             return [0, $err];

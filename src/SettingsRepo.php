@@ -5,8 +5,12 @@ final class SettingsRepo
 {
     public static function get(): array
     {
-        $r = Db::get()->query('SELECT wage_cents, currency_symbol FROM settings WHERE id = 1')->fetch();
-        return ['wage' => round((int)$r['wage_cents'] / 100, 2), 'symbol' => $r['currency_symbol']];
+        $r = Db::get()->query('SELECT wage_cents, currency_symbol, break_minutes FROM settings WHERE id = 1')->fetch();
+        return [
+            'wage' => round((int)$r['wage_cents'] / 100, 2),
+            'symbol' => $r['currency_symbol'],
+            'break' => (int)$r['break_minutes'],
+        ];
     }
 
     /** Returns an error message or null. */
@@ -28,6 +32,12 @@ final class SettingsRepo
                 return 'The currency symbol can be at most 4 characters.';
             }
         }
+        if (array_key_exists('break', $in)) {
+            $b = $in['break'];
+            if (!is_numeric($b) || $b < 0 || $b > 1440 || floor((float)$b) != $b) {
+                return 'Enter the default break in whole minutes.';
+            }
+        }
         return null;
     }
 
@@ -40,9 +50,10 @@ final class SettingsRepo
         if ($symbol === '') {
             $symbol = 'Kč';
         }
+        $break = array_key_exists('break', $in) ? (int)$in['break'] : $cur['break'];
         $pdo->beginTransaction();
-        $pdo->prepare('UPDATE settings SET wage_cents = ?, currency_symbol = ?, updated_at = ? WHERE id = 1')
-            ->execute([$wageCents, $symbol, now_iso()]);
+        $pdo->prepare('UPDATE settings SET wage_cents = ?, currency_symbol = ?, break_minutes = ?, updated_at = ? WHERE id = 1')
+            ->execute([$wageCents, $symbol, $break, now_iso()]);
         if ($applyToPlanned) {
             $pdo->prepare('UPDATE shifts SET rate_cents = ?, updated_at = ? WHERE status = \'planned\'')
                 ->execute([$wageCents, now_iso()]);
