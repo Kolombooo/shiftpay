@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^healthz$ healthz.php [L]
+RewriteRule ^login$ login.php [L]
+RewriteRule ^setup$ setup.php [L]
+RewriteRule ^api/index\.php$ - [L]
+RewriteRule ^api(/.*)?$ api/index.php [L]

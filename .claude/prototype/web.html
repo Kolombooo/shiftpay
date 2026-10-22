@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <title>Shift Pay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+    <style>
+        :root {
+            --bg: #EDF1F3;
+            --surface: #FFFFFF;
+            --ink: #14232B;
+            --muted: #5B6B73;
+            --line: #D6DEE2;
+            --accent: #0E6B5C;
+            --accent-ink: #FFFFFF;
+            --accent-soft: #CFE8E2;
+            --bonus: #A8480A;
+            --bonus-bg: #FBE9D4;
+            --planned: #2F4CB3;
+            --planned-bg: #E3E9FB;
+            --danger: #B3261E;
+            --display: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color-scheme: light;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0E181D;
+                --surface: #17252C;
+                --ink: #E8F0F2;
+                --muted: #93A5AD;
+                --line: #2A3B43;
+                --accent: #3FB89E;
+                --accent-ink: #04211B;
+                --accent-soft: #1E4A41;
+                --bonus: #F4B35E;
+                --bonus-bg: #3A2A14;
+                --planned: #9DB1FF;
+                --planned-bg: #232C4D;
+                --danger: #FF8A80;
+                color-scheme: dark;
+            }
+        }
+        :root[data-theme="dark"] {
+            --bg: #0E181D;
+            --surface: #17252C;
+            --ink: #E8F0F2;
+            --muted: #93A5AD;
+            --line: #2A3B43;
+            --accent: #3FB89E;
+            --accent-ink: #04211B;
+            --accent-soft: #1E4A41;
+            --bonus: #F4B35E;
+            --bonus-bg: #3A2A14;
+            --planned: #9DB1FF;
+            --planned-bg: #232C4D;
+            --danger: #FF8A80;
+            color-scheme: dark;
+        }
+
+        :root {
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+        *, *::before, *::after { box-sizing: inherit; }
+        html, body { margin: 0; }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--body);
+            font-size: 16px;
+            line-height: 1.4;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button { font: inherit; color: inherit; cursor: pointer; }
+        .app { max-width: 560px; margin: 0 auto; padding: 14px 16px 120px; }
+
+        /* header */
+        .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+        .month { display: flex; align-items: center; gap: 4px; }
+        .month h1 { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 0; min-width: 9.5ch; text-align: center; letter-spacing: -0.01em; }
+        .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; color: var(--ink); }
+        .icon-btn:hover { background: var(--line); }
+        .icon-btn:focus-visible, .btn:focus-visible, .seg button:focus-visible, .row:focus-visible, .fab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* hero */
+        .hero { background: var(--accent); color: var(--accent-ink); border-radius: 22px; padding: 20px 20px 18px; }
+        .hero .label { font-size: 15px; font-weight: 500; opacity: .85; margin: 0; }
+        .hero .total { font-family: var(--display); font-weight: 700; font-size: clamp(44px, 14vw, 64px); line-height: 1.05; letter-spacing: -0.03em; margin: 4px 0 14px; font-variant-numeric: tabular-nums; }
+        .bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: color-mix(in srgb, var(--accent-ink) 22%, transparent); }
+        .bar .w { background: var(--accent-ink); }
+        .bar .p { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--accent-ink) 70%, transparent) 0 4px, transparent 4px 8px); }
+        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+        .split div { min-width: 0; }
+        .split .k { font-size: 13.5px; opacity: .85; margin: 0; display: flex; align-items: center; gap: 6px; }
+        .split .v { font-family: var(--display); font-weight: 700; font-size: 20px; margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+        .split .h { font-size: 13.5px; opacity: .8; margin: 0; }
+        .swatch { width: 12px; height: 12px; border-radius: 3px; background: var(--accent-ink); display: inline-block; }
+        .swatch.p { background: repeating-linear-gradient(135deg, var(--accent-ink) 0 2px, transparent 2px 4px); outline: 1px solid var(--accent-ink); }
+        .bonus-line { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--accent-ink) 25%, transparent); font-size: 14.5px; display: flex; justify-content: space-between; gap: 8px; }
+        .bonus-line b { font-variant-numeric: tabular-nums; }
+
+        /* list */
+        .list { margin-top: 18px; display: grid; gap: 8px; }
+        .row { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px 10px 10px; width: 100%; text-align: left; }
+        .row:active { background: var(--bg); }
+        .date { height: 52px; border-radius: 12px; display: grid; align-content: center; justify-items: center; background: var(--accent-soft); color: var(--ink); line-height: 1.1; }
+        .date .dow { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+        .date .dn { font-family: var(--display); font-weight: 700; font-size: 20px; }
+        .row.planned .date { background: transparent; border: 1.5px dashed var(--planned); }
+        .row.planned .date .dow { color: var(--planned); }
+        .info { min-width: 0; }
+        .info .t { margin: 0; font-weight: 600; font-size: 16px; }
+        .info .m { margin: 1px 0 0; font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tag { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 1px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; }
+        .tag.planned { background: var(--planned-bg); color: var(--planned); }
+        .pay { text-align: right; }
+        .pay .a { font-family: var(--display); font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; margin: 0; }
+        .pay .b { margin: 2px 0 0; font-size: 12.5px; font-weight: 600; color: var(--bonus); background: var(--bonus-bg); border-radius: 99px; padding: 1px 8px; display: inline-block; font-variant-numeric: tabular-nums; }
+        .mark { margin-top: 4px; font-size: 13px; font-weight: 600; color: var(--accent); background: transparent; border: 1.5px solid var(--accent); border-radius: 99px; padding: 3px 10px; min-height: 30px; }
+        .empty { text-align: center; padding: 36px 16px; color: var(--muted); }
+        .empty strong { display: block; font-family: var(--display); font-size: 20px; color: var(--ink); margin-bottom: 4px; }
+
+        .fab { position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border: 0; border-radius: 99px; padding: 0 22px 0 18px; height: 56px; font-weight: 600; font-size: 16.5px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+        .fab svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.4; fill: none; stroke-linecap: round; }
+        .foot { margin-top: 22px; text-align: center; font-size: 13px; color: var(--muted); }
+        .warn { background: var(--bonus-bg); color: var(--bonus); border-radius: 12px; padding: 8px 12px; font-size: 14px; margin-bottom: 12px; }
+        .warn[hidden] { display: none; }
+
+        /* sheet */
+        .overlay { position: fixed; inset: 0; z-index: 20; background: rgba(8, 16, 20, .55); display: flex; align-items: flex-end; justify-content: center; }
+        .overlay[hidden] { display: none; }
+        .sheet { background: var(--surface); width: 100%; max-width: 560px; max-height: 94%; overflow-y: auto; border-radius: 24px 24px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
+        .sheet h2 { font-family: var(--display); font-size: 22px; margin: 0 0 14px; letter-spacing: -0.01em; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .field { display: grid; gap: 4px; min-width: 0; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { font-size: 14px; font-weight: 500; color: var(--muted); }
+        .field input[type=text], .field input[type=number], .field input[type=date], .field input[type=time], .field textarea {
+            width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: var(--bg);
+            border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; height: 48px;
+        }
+        .field textarea { height: 84px; padding: 10px 12px; resize: vertical; }
+        .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+        .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1.5px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+        .seg button { border: 0; background: transparent; height: 42px; border-radius: 9px; font-weight: 600; color: var(--muted); }
+        .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+        .preview { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 15px; }
+        .preview b { font-family: var(--display); font-size: 19px; font-variant-numeric: tabular-nums; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+        .btn { height: 50px; border-radius: 14px; border: 1.5px solid var(--line); background: transparent; font-weight: 600; font-size: 16px; }
+        .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+        .btn.danger { color: var(--danger); border-color: var(--danger); }
+        .btn.wide { grid-column: 1 / -1; }
+        .err { color: var(--danger); font-size: 14px; margin: 10px 0 0; min-height: 0; }
+        .check { display: flex; align-items: center; gap: 10px; font-size: 15px; padding: 6px 0; }
+        .check input { width: 22px; height: 22px; accent-color: var(--accent); }
+        details { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+        summary { font-weight: 600; cursor: pointer; padding: 6px 0; }
+        details .field { margin-top: 10px; }
+        .hint { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
+        @media (prefers-reduced-motion: no-preference) {
+            .sheet { animation: up .18s ease-out; }
+            @keyframes up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="top">
+        <div class="month">
+            <button class="icon-btn" id="prev" aria-label="Previous month"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <h1 id="monthName"></h1>
+            <button class="icon-btn" id="next" aria-label="Next month"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+
+    <div class="warn" id="storageWarn" hidden>This browser isn’t saving your data. Your shifts will be lost when you close the page.</div>
+
+    <section class="hero" aria-live="polite">
+        <p class="label" id="heroLabel">Month total</p>
+        <p class="total" id="heroTotal">$0.00</p>
+        <div class="bar" id="heroBar" aria-hidden="true"><span class="w" id="barW"></span><span class="p" id="barP"></span></div>
+        <div class="split">
+            <div>
+                <p class="k"><span class="swatch"></span>Worked</p>
+                <p class="v" id="workedPay">$0.00</p>
+                <p class="h" id="workedHrs">0 h</p>
+            </div>
+            <div>
+                <p class="k"><span class="swatch p"></span>Planned</p>
+                <p class="v" id="plannedPay">$0.00</p>
+                <p class="h" id="plannedHrs">0 h</p>
+            </div>
+        </div>
+        <p class="bonus-line"><span>Bonuses included</span><b id="bonusTotal">$0.00</b></p>
+    </section>
+
+    <div class="list" id="list"></div>
+    <p class="foot">Saved on this device only. Use Settings to back up.</p>
+</div>
+
+<button class="fab" id="addBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add shift</button>
+
+<!-- shift sheet -->
+<div class="overlay" id="shiftOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shiftTitle">
+        <h2 id="shiftTitle">Add shift</h2>
+        <div class="grid">
+            <div class="field full">
+                <label>Status</label>
+                <div class="seg">
+                    <button type="button" id="stWorked" aria-pressed="true">Worked</button>
+                    <button type="button" id="stPlanned" aria-pressed="false">Planned</button>
+                </div>
+            </div>
+            <div class="field full"><label for="fDate">Date</label><input type="date" id="fDate"></div>
+            <div class="field"><label for="fStart">Start</label><input type="time" id="fStart"></div>
+            <div class="field"><label for="fEnd">End</label><input type="time" id="fEnd"></div>
+            <div class="field"><label for="fBreak">Unpaid break (min)</label><input type="number" id="fBreak" inputmode="numeric" min="0" step="1"></div>
+            <div class="field"><label for="fRate">Hourly rate</label><input type="number" id="fRate" inputmode="decimal" min="0" step="0.01"></div>
+            <div class="field full"><label for="fBonus">Bonus for this shift</label><input type="number" id="fBonus" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field full"><label for="fNote">Note (optional)</label><input type="text" id="fNote" maxlength="80"></div>
+        </div>
+        <p class="preview" id="preview"></p>
+        <p class="err" id="shiftErr" role="alert"></p>
+        <div class="actions">
+            <button class="btn" id="shiftCancel" type="button">Cancel</button>
+            <button class="btn primary" id="shiftSave" type="button">Save shift</button>
+            <button class="btn danger wide" id="shiftDelete" type="button" hidden>Delete shift</button>
+        </div>
+    </div>
+</div>
+
+<!-- settings sheet -->
+<div class="overlay" id="setOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+        <h2 id="setTitle">Settings</h2>
+        <div class="grid">
+            <div class="field"><label for="sWage">Hourly wage</label><input type="number" id="sWage" inputmode="decimal" min="0" step="0.01"></div>
+            <div class="field"><label for="sSymbol">Currency symbol</label><input type="text" id="sSymbol" maxlength="4"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="sApply"> Also update planned shifts to this wage</label>
+        <p class="hint">New shifts use this wage. Worked shifts keep the rate they were saved with.</p>
+        <p class="err" id="setErr" role="alert"></p>
+        <details>
+            <summary>Backup and restore</summary>
+            <div class="actions" style="margin-top:6px">
+                <button class="btn wide" id="copyBackup" type="button">Copy backup to clipboard</button>
+            </div>
+            <div class="field"><label for="restoreText">Paste a backup to restore</label><textarea id="restoreText" placeholder="Paste backup text here"></textarea></div>
+            <div class="actions"><button class="btn wide" id="restoreBtn" type="button">Restore from backup</button></div>
+            <p class="hint" id="backupMsg"></p>
+        </details>
+        <div class="actions">
+            <button class="btn" id="setCancel" type="button">Close</button>
+            <button class="btn primary" id="setSave" type="button">Save settings</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var KEY = 'shiftpay.v1';
+        var state = { wage: 0, symbol: '$', shifts: [] };
+        var storageOk = true;
+        var view = new Date(); view.setDate(1); view.setHours(0, 0, 0, 0);
+        var editingId = null;
+        var statusTouched = false;
+        var status = 'worked';
+        var deleteArmed = false;
+
+        function $(id) { return document.getElementById(id); }
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+        function todayStr() { return ymd(new Date()); }
+        function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+        function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+        function load() {
+            try {
+                var raw = localStorage.getItem(KEY);
+                if (raw) {
+                    var s = JSON.parse(raw);
+                    if (s && Array.isArray(s.shifts)) {
+                        state.wage = Number(s.wage) || 0;
+                        state.symbol = typeof s.symbol === 'string' && s.symbol ? s.symbol : '$';
+                        state.shifts = s.shifts;
+                    }
+                }
+            } catch (e) {}
+        }
+        function save() {
+            try { localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+            catch (e) { storageOk = false; }
+            $('storageWarn').hidden = storageOk;
+        }
+
+        function money(n) {
+            return state.symbol + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function hoursOf(s) {
+            var a = s.start.split(':').map(Number), b = s.end.split(':').map(Number);
+            var mins = (b[0] * 60 + b[1]) - (a[0] * 60 + a[1]);
+            if (mins <= 0) mins += 1440;
+            mins -= Number(s.brk) || 0;
+            return Math.max(0, mins) / 60;
+        }
+        function fmtH(h) {
+            var m = Math.round(h * 60), hh = Math.floor(m / 60), mm = m % 60;
+            if (!hh) return mm + ' min';
+            return mm ? hh + ' h ' + mm + ' min' : hh + ' h';
+        }
+        function fmtTime(t) {
+            var p = t.split(':').map(Number);
+            return new Date(2000, 0, 1, p[0], p[1]).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        }
+        function wagePay(s) { return hoursOf(s) * (Number(s.rate) || 0); }
+        function parseDate(str) { var p = str.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+
+        function render() {
+            var key = view.getFullYear() + '-' + pad(view.getMonth() + 1);
+            var monthLong = view.toLocaleString(undefined, { month: 'long' });
+            $('monthName').textContent = view.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+            $('heroLabel').textContent = monthLong + ' payout';
+
+            var shifts = state.shifts.filter(function (s) { return s.date.indexOf(key) === 0; })
+                .sort(function (a, b) { return a.date === b.date ? a.start.localeCompare(b.start) : a.date.localeCompare(b.date); });
+
+            var wPay = 0, pPay = 0, wH = 0, pH = 0, bonus = 0;
+            shifts.forEach(function (s) {
+                var total = wagePay(s) + (Number(s.bonus) || 0);
+                bonus += Number(s.bonus) || 0;
+                if (s.status === 'planned') { pPay += total; pH += hoursOf(s); }
+                else { wPay += total; wH += hoursOf(s); }
+            });
+            var all = wPay + pPay;
+            $('heroTotal').textContent = money(all);
+            $('workedPay').textContent = money(wPay);
+            $('plannedPay').textContent = money(pPay);
+            $('workedHrs').textContent = fmtH(wH);
+            $('plannedHrs').textContent = fmtH(pH);
+            $('bonusTotal').textContent = money(bonus);
+            $('barW').style.width = all ? (wPay / all * 100) + '%' : '0';
+            $('barP').style.width = all ? (pPay / all * 100) + '%' : '0';
+            $('heroBar').style.display = all ? 'flex' : 'none';
+
+            var today = todayStr();
+            var list = $('list');
+            if (!shifts.length) {
+                list.innerHTML = '<div class="empty"><strong>No shifts in ' + esc(monthLong) + '</strong>Add a worked or planned shift to see your payout.</div>';
+                return;
+            }
+            list.innerHTML = shifts.map(function (s) {
+                var d = parseDate(s.date);
+                var planned = s.status === 'planned';
+                var total = wagePay(s) + (Number(s.bonus) || 0);
+                var meta = fmtTime(s.start) + ' – ' + fmtTime(s.end) + ' · ' + fmtH(hoursOf(s));
+                var overdue = planned && s.date <= today;
+                return '<div class="row ' + (planned ? 'planned' : 'worked') + '" role="button" tabindex="0" data-id="' + s.id + '" data-act="edit">' +
+                    '<div class="date"><span class="dow">' + esc(d.toLocaleString(undefined, { weekday: 'short' })) + '</span><span class="dn">' + d.getDate() + '</span></div>' +
+                    '<div class="info"><p class="t">' + (s.note ? esc(s.note) : (planned ? 'Planned shift' : 'Shift')) + (planned ? '<span class="tag planned">Planned</span>' : '') + '</p>' +
+                    '<p class="m">' + meta + '</p></div>' +
+                    '<div class="pay"><p class="a">' + money(total) + '</p>' +
+                    (Number(s.bonus) > 0 ? '<span class="b">+' + money(s.bonus) + ' bonus</span>' : '') +
+                    (overdue ? '<br><button class="mark" type="button" data-id="' + s.id + '" data-act="done">Mark worked</button>' : '') +
+                    '</div></div>';
+            }).join('');
+        }
+
+        /* shift sheet */
+        function setStatus(v) {
+            status = v;
+            $('stWorked').setAttribute('aria-pressed', v === 'worked');
+            $('stPlanned').setAttribute('aria-pressed', v === 'planned');
+        }
+        function currentForm() {
+            return {
+                date: $('fDate').value, start: $('fStart').value, end: $('fEnd').value,
+                brk: parseFloat($('fBreak').value) || 0,
+                rate: parseFloat($('fRate').value),
+                bonus: parseFloat($('fBonus').value) || 0,
+                note: $('fNote').value.trim(), status: status
+            };
+        }
+        function updatePreview() {
+            var f = currentForm();
+            if (!f.start || !f.end || isNaN(f.rate)) { $('preview').innerHTML = 'Enter times and a rate to see the pay.'; return; }
+            var h = hoursOf(f), base = h * f.rate;
+            $('preview').innerHTML = fmtH(h) + ' × ' + money(f.rate) + ' = ' + money(base) +
+                (f.bonus ? ' + ' + money(f.bonus) + ' bonus' : '') + '<br><b>' + money(base + f.bonus) + '</b>';
+        }
+        function openShift(id) {
+            editingId = id || null;
+            deleteArmed = false;
+            $('shiftErr').textContent = '';
+            $('shiftDelete').textContent = 'Delete shift';
+            var s = id ? state.shifts.filter(function (x) { return x.id === id; })[0] : null;
+            $('shiftTitle').textContent = s ? 'Edit shift' : 'Add shift';
+            $('shiftDelete').hidden = !s;
+            if (s) {
+                $('fDate').value = s.date; $('fStart').value = s.start; $('fEnd').value = s.end;
+                $('fBreak').value = s.brk; $('fRate').value = s.rate; $('fBonus').value = s.bonus || '';
+                $('fNote').value = s.note || ''; setStatus(s.status); statusTouched = true;
+            } else {
+                var t = todayStr(), key = view.getFullYear() + '-' + pad(view.getMonth() + 1);
+                var d = t.indexOf(key) === 0 ? t : key + '-01';
+                $('fDate').value = d; $('fStart').value = '09:00'; $('fEnd').value = '17:00';
+                $('fBreak').value = 30; $('fRate').value = state.wage || ''; $('fBonus').value = ''; $('fNote').value = '';
+                statusTouched = false; setStatus(d > t ? 'planned' : 'worked');
+            }
+            updatePreview();
+            $('shiftOverlay').hidden = false;
+        }
+        function closeShift() { $('shiftOverlay').hidden = true; editingId = null; }
+        function saveShift() {
+            var f = currentForm();
+            var err = '';
+            if (!f.date) err = 'Choose a date.';
+            else if (!f.start || !f.end) err = 'Enter a start and end time.';
+            else if (isNaN(f.rate) || f.rate < 0) err = 'Enter an hourly rate.';
+            else if (hoursOf(f) <= 0) err = 'The break is longer than the shift.';
+            if (err) { $('shiftErr').textContent = err; return; }
+            if (editingId) {
+                state.shifts = state.shifts.map(function (s) { return s.id === editingId ? Object.assign({ id: editingId }, f) : s; });
+            } else {
+                state.shifts.push(Object.assign({ id: uid() }, f));
+            }
+            save();
+            var d = parseDate(f.date); view = new Date(d.getFullYear(), d.getMonth(), 1);
+            closeShift(); render();
+        }
+        function deleteShift() {
+            if (!deleteArmed) { deleteArmed = true; $('shiftDelete').textContent = 'Tap again to delete'; return; }
+            state.shifts = state.shifts.filter(function (s) { return s.id !== editingId; });
+            save(); closeShift(); render();
+        }
+
+        /* settings */
+        function openSettings(firstRun) {
+            $('sWage').value = state.wage || '';
+            $('sSymbol').value = state.symbol;
+            $('sApply').checked = false;
+            $('setErr').textContent = '';
+            $('backupMsg').textContent = '';
+            $('restoreText').value = '';
+            $('setTitle').textContent = firstRun ? 'Set your hourly wage' : 'Settings';
+            $('setOverlay').hidden = false;
+            if (firstRun) $('sWage').focus();
+        }
+        function saveSettings() {
+            var w = parseFloat($('sWage').value);
+            if (isNaN(w) || w <= 0) { $('setErr').textContent = 'Enter your hourly wage.'; return; }
+            state.wage = w;
+            state.symbol = $('sSymbol').value.trim() || '$';
+            if ($('sApply').checked) {
+                state.shifts.forEach(function (s) { if (s.status === 'planned') s.rate = w; });
+            }
+            save(); $('setOverlay').hidden = true; render();
+        }
+        function copyBackup() {
+            var text = JSON.stringify(state);
+            function fallback() {
+                var ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+                $('backupMsg').textContent = ok ? 'Backup copied. Paste it into a note to keep it safe.' : 'Couldn’t copy. Try again.';
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function () {
+                    $('backupMsg').textContent = 'Backup copied. Paste it into a note to keep it safe.';
+                }, fallback);
+            } else fallback();
+        }
+        function restoreBackup() {
+            try {
+                var s = JSON.parse($('restoreText').value);
+                if (!s || !Array.isArray(s.shifts)) throw new Error('bad');
+                var ok = s.shifts.every(function (x) { return x && x.id && x.date && x.start && x.end; });
+                if (!ok) throw new Error('bad');
+                state.wage = Number(s.wage) || 0;
+                state.symbol = s.symbol || '$';
+                state.shifts = s.shifts;
+                save(); render();
+                $('sWage').value = state.wage || ''; $('sSymbol').value = state.symbol;
+                $('backupMsg').textContent = 'Restored ' + state.shifts.length + ' shifts.';
+            } catch (e) {
+                $('backupMsg').textContent = 'That doesn’t look like a backup. Copy it again and retry.';
+            }
+        }
+
+        /* wiring */
+        $('prev').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); render(); };
+        $('next').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); };
+        $('addBtn').onclick = function () { openShift(null); };
+        $('settingsBtn').onclick = function () { openSettings(false); };
+        $('shiftCancel').onclick = closeShift;
+        $('shiftSave').onclick = saveShift;
+        $('shiftDelete').onclick = deleteShift;
+        $('setCancel').onclick = function () { $('setOverlay').hidden = true; };
+        $('setSave').onclick = saveSettings;
+        $('copyBackup').onclick = copyBackup;
+        $('restoreBtn').onclick = restoreBackup;
+        $('stWorked').onclick = function () { statusTouched = true; setStatus('worked'); };
+        $('stPlanned').onclick = function () { statusTouched = true; setStatus('planned'); };
+        ['fDate', 'fStart', 'fEnd', 'fBreak', 'fRate', 'fBonus'].forEach(function (id) {
+            $(id).addEventListener('input', function () {
+                if (id === 'fDate' && !editingId && !statusTouched && $('fDate').value) {
+                    setStatus($('fDate').value > todayStr() ? 'planned' : 'worked');
+                }
+                updatePreview();
+            });
+        });
+        $('shiftOverlay').addEventListener('click', function (e) { if (e.target === this) closeShift(); });
+        $('setOverlay').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
+        $('list').addEventListener('click', function (e) {
+            var el = e.target.closest('[data-act]');
+            if (!el) return;
+            var id = el.getAttribute('data-id');
+            if (el.getAttribute('data-act') === 'done') {
+                e.stopPropagation();
+                state.shifts.forEach(function (s) { if (s.id === id) s.status = 'worked'; });
+                save(); render();
+            } else openShift(id);
+        });
+        $('list').addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('row')) {
+                e.preventDefault(); openShift(e.target.getAttribute('data-id'));
+            }
+        });
+
+        load();
+        render();
+        if (!state.wage) openSettings(true);
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+.claude
+.idea
+.git
+tests
+README.md
+*.sqlite*

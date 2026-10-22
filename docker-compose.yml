@@ -1,0 +1,18 @@
+services:
+  shiftpay:
+    build: .
+    image: shiftpay:latest
+    container_name: shiftpay
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Europe/Prague}
+      SETUP_TOKEN: ${SETUP_TOKEN:-}
+      SESSION_DAYS: ${SESSION_DAYS:-365}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    volumes:
+      - shiftpay-data:/data
+
+volumes:
+  shiftpay-data:
