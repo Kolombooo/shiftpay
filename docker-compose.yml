@@ -13,6 +13,8 @@ services:
       TRUST_PROXY: ${TRUST_PROXY:-false}
     volumes:
       - shiftpay-data:/data
+    networks:
+      - proxy_network
 
 volumes:
   shiftpay-data:
