@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__ . '/../../src/bootstrap.php';
 
 set_exception_handler(function (Throwable $ex): void {
-    error_log('shiftpay: ' . get_class($ex) . ': ' . $ex->getMessage());
+    error_log('shiftpay: ' . get_class($ex) . ': ' . $ex->getMessage() . ' at ' . basename($ex->getFile()) . ':' . $ex->getLine());
     json_error(500, 'Something went wrong on the server.');
 });
 

@@ -240,3 +240,4 @@ body.auth { display: grid; place-items: center; min-height: 100vh; padding: 16px
     .side { max-width: 640px; }
 }
 .sheet:focus { outline: none; }
+html { background: var(--bg); }

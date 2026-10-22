@@ -17,7 +17,8 @@ $v = (string)@filemtime(__DIR__ . '/assets/app.js');
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#0E6B5C">
+    <meta name="theme-color" content="#EDF1F3" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0E181D" media="(prefers-color-scheme: dark)">
     <title>Shift Pay</title>
     <link rel="manifest" href="/assets/manifest.webmanifest">
     <link rel="icon" href="/assets/icons/icon-192.png">
