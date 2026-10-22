@@ -3,5 +3,5 @@
 - [x] The light green card showing the monthly summary does not resize with content. We need to make sure that the card resizes dynamically based on the content inside it. With regard of minimal width.
 - [x] Add bulk shift adding. (Shifts on these times on these days)
 - [x] Make the default break configurable alognside the default wage.
-
 - [x] On phone, months can be changed by swiping left or right. We need to implement this feature for better user experience on mobile devices.
+- [x] When the user clicks on new shift or edits a shift on mobile, the first input field is auto selected. Remove this.

@@ -247,8 +247,10 @@
     function openOverlay(id, focusId) {
         lastFocus = document.activeElement;
         $(id).hidden = false;
-        var f = $(focusId);
-        if (f) f.focus();
+        // On touch devices focusing a field opens the keyboard, so focus the dialog itself.
+        var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        var f = touch ? $(id).querySelector('.sheet') : $(focusId);
+        if (f) { f.tabIndex = -1; f.focus({ preventScroll: true }); }
     }
     function closeOverlay(id) {
         $(id).hidden = true;

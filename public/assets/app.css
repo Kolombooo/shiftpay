@@ -239,3 +239,4 @@ body.auth { display: grid; place-items: center; min-height: 100vh; padding: 16px
     .app { grid-template-columns: minmax(360px, max-content) 1fr; }
     .side { max-width: 640px; }
 }
+.sheet:focus { outline: none; }
