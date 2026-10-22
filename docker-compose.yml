@@ -18,3 +18,7 @@ services:
 
 volumes:
   shiftpay-data:
+
+networks:
+  proxy_network:
+    external: true
